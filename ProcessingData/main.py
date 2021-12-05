@@ -38,6 +38,12 @@ def reverse_rows():
 
 
 def calculate_rsi(df: pd.DataFrame, length: int = 14):
+    """
+    Wrapper function for RSI
+    :param df:
+    :param length:
+    :return:
+    """
     if not isinstance(length, int):
         raise Exception("length must be an integer!")
 
@@ -45,32 +51,52 @@ def calculate_rsi(df: pd.DataFrame, length: int = 14):
 
 
 def calculate_sma(df: pd.DataFrame, length: int = 50):
+    """
+    Wrapper function for sma
+    :param df:
+    :param length:
+    :return:
+    """
     if not isinstance(length, int):
         raise Exception("length must be an integer!")
     df[f'SMA_{length}'] = ta.sma(df['Close'], length=length)
 
 
 def calculate_macd(df: pd.DataFrame, fast: int = 12, slow: int = 26, signal: int = 9):
+    """
+    Wrapper function for MACD
+    :param df:
+    :param fast:
+    :param slow:
+    :param signal:
+    :return:
+    """
     if not isinstance(fast, int):
         raise Exception("fast must be an integer!")
     if not isinstance(slow, int):
         raise Exception("slow must be an integer!")
     if not isinstance(signal, int):
         raise Exception("signal must be an integer!")
-    df[f'MACD_{fast}_{slow}_{signal}'] = ta.macd(close=df['Close'], fast=fast, slow=slow, signal=signal)[f'MACD_{fast}_{slow}_{signal}']
+    df[f'MACD_{fast}_{slow}_{signal}'] = ta.macd(close=df['Close'], fast=fast, slow=slow, signal=signal)[
+        f'MACD_{fast}_{slow}_{signal}']
 
 
 def main():
+    # load the data
+    # BTCUSD_all_simple.parquet contains all CSV files merged into one, without any processing done on them
     load_path = os.path.join('BTC Minute CSVs', 'BTCUSD_all_simple.parquet')
     df = pd.read_parquet(load_path, engine='fastparquet')
+
+    # do what you wanna do
     calculate_rsi(df, 14)
     calculate_sma(df)
     calculate_macd(df)
 
+    # saving the new data
     save_path = os.path.join('BTC Minute CSVs', 'BTCUSER_all_processed.parquet')
     df.to_parquet(save_path, engine='fastparquet')
 
-    # if you want to check the values, uncomment the 2 lines bellow
+    # if you want to check the values, uncomment the 2 lines bellow to save them in a csv file
     # csv_path = os.path.join('BTC Minute CSVs', 'BTCUSER_all_processed.csv')
     # df.to_csv(csv_path, index=False)
 
