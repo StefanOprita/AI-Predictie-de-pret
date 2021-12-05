@@ -1,0 +1,4 @@
+* text=auto
+
+#For plaque files
+*.plaque filter=lfs diff=lfs merge=lfs -text
