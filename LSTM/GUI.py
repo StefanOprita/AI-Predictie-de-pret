@@ -17,9 +17,7 @@ def do_predictions(model, path_to_csv):
 
     temp = df.iloc[indexes]
     df = temp
-
     df = df[len(df) - 50:]
-
     df = df['Open'].values
     df = df.reshape(-1, 1)
 
@@ -27,11 +25,10 @@ def do_predictions(model, path_to_csv):
     df = np.array(df)
     scaler.fit(df)
     values_to_model = scaler.transform(df)
-
     predictions = model.predict(values_to_model)
 
     rez = []
-    predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
+    predictions = scaler.inverse_transform(predictions)
     for pred in predictions:
         rez.append(pred[0])
 
@@ -81,7 +78,7 @@ class MyWindow(QMainWindow):
     def get_results(self):
         value = self.drop_down.currentText()
         if value == "Model 1":
-            model = keras.models.load_model("D:\\Facultate\\an 3\\sem 1\\AI\\AI-Predictie-de-pret\\LSTM\\Models\\price_only_prediction_50_future_10_epochs")
+            model = keras.models.load_model("C:\\Users\\strat\\Documents\\GitHub\\AI-Predictie-de-pret\\ProcessingData\\Models\\price_only_prediction_50_future_10_epochs")
             return do_predictions(model, self.chosen_file[0])
         elif value == "Model 2":
             model = keras.models.load_model("D:\\Facultate\\an 3\\sem 1\\AI\\AI-Predictie-de-pret\\LSTM\\Models\\price_only_prediction_50_future_20_epochs")
