@@ -1,14 +1,23 @@
+from time import mktime
+
 import keras.models
 from sklearn.preprocessing import MinMaxScaler
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 import pyqtgraph as pg
-from pyqtgraph import DateAxisItem
+import datetime
 from pyqtgraph.examples.ExampleApp import QFont
 import pandas as pd
 import numpy as np
 import sys
 import pandas_ta as ta
+import datetime as dt
+import matplotlib
+matplotlib.use('Qt5Agg')
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
+from matplotlib.figure import Figure
+
 
 
 def do_predictions_model_1(model, path_to_csv):
@@ -115,7 +124,7 @@ def do_predictions_model_all(model, path_to_csv):
 
     dataset_sma, _ = get_sets(df, 'SMA_50', True)
 
-    dataset_macd,_ = get_sets(df, 'MACD_12_26_9', True)
+    dataset_macd, _ = get_sets(df, 'MACD_12_26_9', True)
 
     dataset_list = [dataset_prices, dataset_rsi, dataset_rsi, dataset_macd]
 
@@ -133,6 +142,12 @@ def do_predictions_model_all(model, path_to_csv):
     return rez, final_timestamps
 
 
+class MplCanvas(FigureCanvasQTAgg):
+
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        super(MplCanvas, self).__init__(fig)
 
 
 class MyWindow(QMainWindow):
@@ -143,29 +158,32 @@ class MyWindow(QMainWindow):
         self.setWindowTitle("Bitcoin Prediction")
         self.setWindowIcon((QtGui.QIcon("bitcoin_logo")))
         self.chosen_file = ""
-        self.drop_down = QtWidgets.QComboBox(self)
-        self.graphWidget = pg.PlotWidget(self)
-        self.graphWidget.hide()
+        # self.graphWidget = pg.PlotWidget(self)
+        self.sc = MplCanvas(self, width=5, height=4, dpi=100)
+        self.sc.hide()
         self.label = QtWidgets.QLabel(self)
+        self.drop_down = QtWidgets.QComboBox(self)
         self.btn_show_graphic = QtWidgets.QPushButton(self)
         self.btn_choose_file = QtWidgets.QPushButton(self)
         self.init_ui()
 
     def show_graphic(self):
-        self.label.hide()
-        styles = {'color': 'white', 'font-size': '15px'}
-        self.graphWidget.setAxisItems({'bottom': DateAxisItem()})
-        self.graphWidget.setLabel('left', 'Value(BTC)', **styles)
-        self.graphWidget.setLabel('bottom', 'Time', **styles)
-        self.graphWidget.setTitle("Bitcoin Prediction")
-        self.graphWidget.setGeometry(40, 50, 930, 430)
-        pen = pg.mkPen(color=(255, 0, 0), width=1)
-
         bitcoin_value, res_time = self.get_results()
-        print(res_time)
-        self.graphWidget.plot(res_time, bitcoin_value, pen=pen)
+        dates = [dt.datetime.fromtimestamp(ts/1000) for ts in res_time]
 
-        self.graphWidget.show()
+        toolbar = NavigationToolbar2QT(self.sc, self)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(toolbar)
+        self.sc.axes.cla()
+        self.sc.axes.plot(dates, bitcoin_value)
+
+        layout.addWidget(self.sc)
+        widget = QtWidgets.QWidget()
+        widget.setLayout(layout)
+
+        self.setMenuWidget(widget)
+        self.sc.show()
+
 
     def choose_file(self):
         self.chosen_file = QtWidgets.QFileDialog.getOpenFileName(self, 'Upload CSV', '.', 'CSV files (*.csv)')
@@ -174,14 +192,14 @@ class MyWindow(QMainWindow):
     def get_results(self):
         value = self.drop_down.currentText()
         if value == "Model 1":
-            model = keras.models.load_model("price_only_prediction_50_future_10_epochs")
+            model = keras.models.load_model("D:\\Facultate\\an 3\\sem 1\\AI\\AI-Predictie-de-pret\\LSTM\\Models\\price_only_prediction_50_future_10_epochs")
             return do_predictions_model_1(model, self.chosen_file[0])
         elif value == "Model 2":
-            model = keras.models.load_model("price_only_prediction_50_future_20_epochs")
+            model = keras.models.load_model("D:\\Facultate\\an 3\\sem 1\\AI\\AI-Predictie-de-pret\\LSTM\\Models\\price_only_prediction_50_future_20_epochs")
             return do_predictions_model_1(model, self.chosen_file[0])
         else:
-            model = keras.models.load_model("stock_prediction_merged_v3_0_steps")
-            print('asdlkjakldsjalksjdlkajsd')
+            model = keras.models.load_model("D:\\Facultate\\an 3\\sem 1\\AI\\AI-Predictie-de-pret\\LSTM\\Models\\all_prediction_50_future_v2_10_epochs")
+
             return do_predictions_model_all(model, self.chosen_file[0])
 
     def init_ui(self):
@@ -201,7 +219,7 @@ class MyWindow(QMainWindow):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.drop_down.setFont(font)
-        self.drop_down.setGeometry(20, 20, 30, 10)
+        self.drop_down.setGeometry(100, 520, 200, 240)
         self.drop_down.addItem("Model 1")
         self.drop_down.addItem("Model 2")
         self.drop_down.addItem("Model 3")
