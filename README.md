@@ -1,7 +1,7 @@
 # AI-Predictie-de-pret
 Proiect la Inteligenta Artificiala
 
-Echipa formată din:  Darabaneanu Cosmin, Lazar Catalina, Munteanu Maria, Oprita Stefan, Stratianu Bianca
+Echipa formată din: Lazar Catalina, Oprita Stefan, Stratianu Bianca
 
 
 ## Enunt
